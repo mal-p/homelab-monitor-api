@@ -1,0 +1,20 @@
+installation_notes.md
+README.md
+laravel/src/home-monitor/README.md
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+.settings/
+nbproject/
+.buildpath
+.externalToolBuilders/
+*.launch
+.cache
+.history/

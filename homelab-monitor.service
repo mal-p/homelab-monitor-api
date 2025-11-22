@@ -1,0 +1,30 @@
+[Unit]
+Description=Laravel Home Monitoring API
+
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+WorkingDirectory=/home/docker/homelab-monitor-api
+
+# Remove orphaned containers
+ExecStartPre=/usr/bin/docker compose -f docker-compose.yml down --remove-orphans
+# Start container when unit is started
+ExecStart=/usr/bin/docker compose -f docker-compose.yml up
+# Stop container when unit is stopped
+ExecStop=/usr/bin/docker compose -f docker-compose.yml down -t 30
+
+Restart=always
+RestartSec=120
+TimeoutStartSec=300
+TimeoutStopSec=120
+
+# Docker logs only. Do not duplicate in journald
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

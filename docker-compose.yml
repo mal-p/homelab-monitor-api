@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+    php_apache:
+        container_name: php_apache
+        build:
+            context: ./laravel
+            dockerfile: Dockerfile
+        environment:
+            - COMPOSER_MEMORY_LIMIT=-1
+        restart: unless-stopped
+        tty: true
+        volumes:
+            - ./laravel/src:/var/www/html
+        network_mode: host
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.50"
+                    memory: 256M
+        security_opt:
+            - no-new-privileges:true
+        depends_on:
+            - postgres
+
+    postgres:
+        container_name: postgres
+        build:
+            context: ./postgresql
+            dockerfile: Dockerfile
+        command: -c config_file=/etc/postgresql.conf
+        env_file:
+            - ./postgresql/database.env
+        restart: unless-stopped
+        tty: true
+        volumes:
+            - ./postgresql/postgresql.conf:/etc/postgresql.conf
+            - timescale_pg_volume:/var/lib/postgresql/data/
+        network_mode: host
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.50"
+                    memory: 256M
+        security_opt:
+            - no-new-privileges:true
+
+volumes:
+    timescale_pg_volume:

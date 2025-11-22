@@ -1,0 +1,2102 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Home-monitor API",
+        "description": "A small home monitoring API for logging electricity usage, temperature etc.",
+        "version": "1.1.0"
+    },
+    "paths": {
+        "/api/device-parameters/{device_parameter_id}/data": {
+            "get": {
+                "tags": [
+                    "parameter-data"
+                ],
+                "summary": "Fetch time-series data for a paramter in time buckets.",
+                "operationId": "deviceParameterDataBucket",
+                "parameters": [
+                    {
+                        "name": "device_parameter_id",
+                        "in": "path",
+                        "description": "The device parameter ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    },
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "description": "Time interval start",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2023-01-30T13:00:00Z"
+                    },
+                    {
+                        "name": "end",
+                        "in": "query",
+                        "description": "Time interval end",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date-time"
+                        },
+                        "example": "2023-01-30T17:00:00Z"
+                    },
+                    {
+                        "name": "bucket_size",
+                        "in": "query",
+                        "description": "The bucket size in minutes",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 60,
+                            "maximum": 1440,
+                            "minimum": 5
+                        },
+                        "example": 60
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "data"
+                                    ],
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "bucket_start",
+                                                    "count",
+                                                    "min_value",
+                                                    "max_value",
+                                                    "avg_value"
+                                                ],
+                                                "properties": {
+                                                    "bucket_start": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-01-30T13:00:00Z"
+                                                    },
+                                                    "count": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "min_value": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20.5
+                                                    },
+                                                    "max_value": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 25.8
+                                                    },
+                                                    "avg_value": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 23.2
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "parameter-data"
+                ],
+                "summary": "Store time-series data for a paramter.",
+                "operationId": "deviceParameterDataStore",
+                "parameters": [
+                    {
+                        "name": "device_parameter_id",
+                        "in": "path",
+                        "description": "The device parameter ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "data"
+                                ],
+                                "properties": {
+                                    "data": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "value",
+                                                "time"
+                                            ],
+                                            "properties": {
+                                                "value": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 25.8
+                                                },
+                                                "time": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-30T13:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "maxItems": 200,
+                                        "minItems": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "message",
+                                        "count"
+                                    ],
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data stored successfully"
+                                        },
+                                        "count": {
+                                            "type": "integer",
+                                            "example": 10
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/devices": {
+            "get": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "List devices.",
+                "operationId": "deviceIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Optional pagination index",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 1000,
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "description": "Returns all devices if no page parameter is provided, or a paginated subset if page is specified",
+                                    "required": [
+                                        "devices",
+                                        "links"
+                                    ],
+                                    "properties": {
+                                        "devices": {
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "id",
+                                                    "name",
+                                                    "is_active",
+                                                    "type"
+                                                ],
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Govee BT Bedroom"
+                                                    },
+                                                    "is_active": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "Bluetooth device"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "description": "Pagination links for navigating between pages",
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "href",
+                                                    "rel",
+                                                    "method"
+                                                ],
+                                                "properties": {
+                                                    "href": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/api/devices?page=2"
+                                                    },
+                                                    "rel": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "next",
+                                                            "prev"
+                                                        ],
+                                                        "example": "next"
+                                                    },
+                                                    "method": {
+                                                        "type": "string",
+                                                        "example": "GET"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "Store a newly created device.",
+                "operationId": "deviceStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type_id",
+                                    "name",
+                                    "serial_number",
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "type_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3,
+                                        "example": "Govee BT Bedroom"
+                                    },
+                                    "serial_number": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 1,
+                                        "example": "56-79-A5-19-08-B7"
+                                    },
+                                    "mpan": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "",
+                                        "nullable": true
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Bedroom",
+                                        "nullable": true
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "",
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "device"
+                                    ],
+                                    "properties": {
+                                        "device": {
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "is_active",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Govee BT Bedroom"
+                                                },
+                                                "serial_number": {
+                                                    "type": "string",
+                                                    "example": "56-79-A5-19-08-B7"
+                                                },
+                                                "mpan": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "Bedroom"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "Bluetooth device"
+                                                },
+                                                "parameters": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "required": [
+                                                            "id",
+                                                            "device_id",
+                                                            "name",
+                                                            "unit",
+                                                            "alarm_type",
+                                                            "alarm_trigger",
+                                                            "alarm_hysteresis",
+                                                            "alarm_active",
+                                                            "alarm_updated_at"
+                                                        ],
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "device_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Temperature"
+                                                            },
+                                                            "unit": {
+                                                                "type": "string",
+                                                                "example": "°C"
+                                                            },
+                                                            "alarm_type": {
+                                                                "type": "string",
+                                                                "example": "low"
+                                                            },
+                                                            "alarm_trigger": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 30
+                                                            },
+                                                            "alarm_hysteresis": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 0
+                                                            },
+                                                            "alarm_active": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "alarm_updated_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2023-01-30T13:00:00Z"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/devices/{device_id}": {
+            "get": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "Show all information for the specified device.",
+                "operationId": "deviceShow",
+                "parameters": [
+                    {
+                        "name": "device_id",
+                        "in": "path",
+                        "description": "The device ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "device"
+                                    ],
+                                    "properties": {
+                                        "device": {
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "is_active",
+                                                "type"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Govee BT Bedroom"
+                                                },
+                                                "serial_number": {
+                                                    "type": "string",
+                                                    "example": "56-79-A5-19-08-B7"
+                                                },
+                                                "mpan": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "Bedroom"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": ""
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "Bluetooth device"
+                                                },
+                                                "parameters": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "required": [
+                                                            "id",
+                                                            "device_id",
+                                                            "name",
+                                                            "unit",
+                                                            "alarm_type",
+                                                            "alarm_trigger",
+                                                            "alarm_hysteresis",
+                                                            "alarm_active",
+                                                            "alarm_updated_at"
+                                                        ],
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "device_id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Temperature"
+                                                            },
+                                                            "unit": {
+                                                                "type": "string",
+                                                                "example": "°C"
+                                                            },
+                                                            "alarm_type": {
+                                                                "type": "string",
+                                                                "example": "low"
+                                                            },
+                                                            "alarm_trigger": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 30
+                                                            },
+                                                            "alarm_hysteresis": {
+                                                                "type": "number",
+                                                                "format": "float",
+                                                                "example": 0
+                                                            },
+                                                            "alarm_active": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            },
+                                                            "alarm_updated_at": {
+                                                                "type": "string",
+                                                                "format": "date-time",
+                                                                "example": "2023-01-30T13:00:00Z"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "Update the specified device.",
+                "operationId": "deviceUpdate",
+                "parameters": [
+                    {
+                        "name": "device_id",
+                        "in": "path",
+                        "description": "The device ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type_id",
+                                    "name",
+                                    "serial_number",
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "type_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3,
+                                        "example": "Govee BT Bedroom"
+                                    },
+                                    "serial_number": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "minLength": 1,
+                                        "example": "56-79-A5-19-08-B7"
+                                    },
+                                    "mpan": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "",
+                                        "nullable": true
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Bedroom",
+                                        "nullable": true
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "",
+                                        "nullable": true
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "devices"
+                ],
+                "summary": "Remove the specified device from storage.",
+                "operationId": "deviceDestroy",
+                "parameters": [
+                    {
+                        "name": "device_id",
+                        "in": "path",
+                        "description": "The device ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/device-parameters": {
+            "get": {
+                "tags": [
+                    "device-parameters"
+                ],
+                "summary": "List device parameters.",
+                "operationId": "deviceParameterIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Optional pagination index",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 1000,
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "description": "Returns all device parameters if no page parameter is provided, or a paginated subset if page is specified",
+                                    "required": [
+                                        "device_parameters",
+                                        "links"
+                                    ],
+                                    "properties": {
+                                        "device_parameters": {
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "id",
+                                                    "device_id",
+                                                    "name",
+                                                    "unit",
+                                                    "alarm_active"
+                                                ],
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 3
+                                                    },
+                                                    "device_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Temperature"
+                                                    },
+                                                    "unit": {
+                                                        "type": "string",
+                                                        "example": "°C"
+                                                    },
+                                                    "alarm_active": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "description": "Pagination links for navigating between pages",
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "href",
+                                                    "rel",
+                                                    "method"
+                                                ],
+                                                "properties": {
+                                                    "href": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/api/device-parameters?page=2"
+                                                    },
+                                                    "rel": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "next",
+                                                            "prev"
+                                                        ],
+                                                        "example": "next"
+                                                    },
+                                                    "method": {
+                                                        "type": "string",
+                                                        "example": "GET"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "device-parameters"
+                ],
+                "summary": "Store a newly created device parameter.",
+                "operationId": "deviceParameterStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "device_id",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "device_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3,
+                                        "example": "Temperature"
+                                    },
+                                    "unit": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "°C",
+                                        "nullable": true
+                                    },
+                                    "alarm_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "none",
+                                            "low",
+                                            "high"
+                                        ],
+                                        "example": "none"
+                                    },
+                                    "alarm_trigger": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 30.1,
+                                        "nullable": true
+                                    },
+                                    "alarm_hysteresis": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 0,
+                                        "example": 1.5,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "device_parameter"
+                                    ],
+                                    "properties": {
+                                        "device_parameter": {
+                                            "required": [
+                                                "id",
+                                                "device_id",
+                                                "name",
+                                                "unit",
+                                                "alarm_type",
+                                                "alarm_trigger",
+                                                "alarm_hysteresis"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "device_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Temperature"
+                                                },
+                                                "unit": {
+                                                    "type": "string",
+                                                    "example": "°C"
+                                                },
+                                                "alarm_type": {
+                                                    "type": "string",
+                                                    "example": "none"
+                                                },
+                                                "alarm_trigger": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 30.1
+                                                },
+                                                "alarm_hysteresis": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1.5
+                                                },
+                                                "alarm_active": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "alarm_updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-30T13:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/device-parameters/{device_parameter_id}": {
+            "get": {
+                "tags": [
+                    "device-parameters"
+                ],
+                "summary": "Show all information for the specified device parameter.",
+                "operationId": "deviceParameterShow",
+                "parameters": [
+                    {
+                        "name": "device_parameter_id",
+                        "in": "path",
+                        "description": "The device parameter ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "device_parameter"
+                                    ],
+                                    "properties": {
+                                        "device_parameter": {
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "unit",
+                                                "alarm_type",
+                                                "alarm_trigger",
+                                                "alarm_hysteresis",
+                                                "alarm_active",
+                                                "alarm_updated_at",
+                                                "device"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 7
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Temperature"
+                                                },
+                                                "unit": {
+                                                    "type": "string",
+                                                    "example": "°C"
+                                                },
+                                                "alarm_type": {
+                                                    "type": "string",
+                                                    "example": "none"
+                                                },
+                                                "alarm_trigger": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 30.1
+                                                },
+                                                "alarm_hysteresis": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1.5
+                                                },
+                                                "alarm_active": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "alarm_updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-30T13:00:00Z"
+                                                },
+                                                "device": {
+                                                    "required": [
+                                                        "id",
+                                                        "name",
+                                                        "is_active",
+                                                        "type"
+                                                    ],
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "name": {
+                                                            "type": "string",
+                                                            "example": "Govee BT Bedroom"
+                                                        },
+                                                        "serial_number": {
+                                                            "type": "string",
+                                                            "example": "56-79-A5-19-08-B7"
+                                                        },
+                                                        "mpan": {
+                                                            "type": "string",
+                                                            "example": ""
+                                                        },
+                                                        "location": {
+                                                            "type": "string",
+                                                            "example": "Bedroom"
+                                                        },
+                                                        "description": {
+                                                            "type": "string",
+                                                            "example": ""
+                                                        },
+                                                        "is_active": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "type": {
+                                                            "type": "string",
+                                                            "example": "Bluetooth device"
+                                                        },
+                                                        "device_type": {
+                                                            "required": [
+                                                                "id",
+                                                                "name",
+                                                                "description"
+                                                            ],
+                                                            "properties": {
+                                                                "id": {
+                                                                    "type": "integer",
+                                                                    "example": 1
+                                                                },
+                                                                "name": {
+                                                                    "type": "string",
+                                                                    "example": "Bluetooth device"
+                                                                },
+                                                                "description": {
+                                                                    "type": "string",
+                                                                    "example": "Govee H5075 Bluetooth temperature/humidity"
+                                                                }
+                                                            },
+                                                            "type": "object"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "device-parameters"
+                ],
+                "summary": "Update the specified device parameter.",
+                "operationId": "deviceParameterUpdate",
+                "parameters": [
+                    {
+                        "name": "device_parameter_id",
+                        "in": "path",
+                        "description": "The device parameter ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "device_id",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "device_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3,
+                                        "example": "Temperature"
+                                    },
+                                    "unit": {
+                                        "type": "string",
+                                        "maxLength": 50,
+                                        "example": "°C",
+                                        "nullable": true
+                                    },
+                                    "alarm_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "none",
+                                            "low",
+                                            "high"
+                                        ],
+                                        "example": "none"
+                                    },
+                                    "alarm_trigger": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 30.1,
+                                        "nullable": true
+                                    },
+                                    "alarm_hysteresis": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "minimum": 0,
+                                        "example": 1.5,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "device-parameters"
+                ],
+                "summary": "Remove the specified device parameter from storage.",
+                "operationId": "deviceParameterDestroy",
+                "parameters": [
+                    {
+                        "name": "device_parameter_id",
+                        "in": "path",
+                        "description": "The device parameter ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/device-types": {
+            "get": {
+                "tags": [
+                    "device-types"
+                ],
+                "summary": "List device types.",
+                "operationId": "deviceTypeIndex",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Optional pagination index",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 1000,
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "description": "Returns all device types if no page parameter is provided, or a paginated subset if page is specified",
+                                    "required": [
+                                        "device_types",
+                                        "links"
+                                    ],
+                                    "properties": {
+                                        "device_types": {
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "id",
+                                                    "name",
+                                                    "description"
+                                                ],
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Bluetooth device"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Govee H5075 Bluetooth temperature/humidity"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "links": {
+                                            "description": "Pagination links for navigating between pages",
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "href",
+                                                    "rel",
+                                                    "method"
+                                                ],
+                                                "properties": {
+                                                    "href": {
+                                                        "type": "string",
+                                                        "example": "http://localhost/api/device-types?page=2"
+                                                    },
+                                                    "rel": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "next",
+                                                            "prev"
+                                                        ],
+                                                        "example": "next"
+                                                    },
+                                                    "method": {
+                                                        "type": "string",
+                                                        "example": "GET"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "device-types"
+                ],
+                "summary": "Store a newly created device type.",
+                "operationId": "deviceTypeStore",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3,
+                                        "example": "Bluetooth device"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Govee H5075 Bluetooth temperature/humidity",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "device_type"
+                                    ],
+                                    "properties": {
+                                        "device_type": {
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "description"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Bluetooth device"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Govee H5075 Bluetooth temperature/humidity"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/device-types/{device_type_id}": {
+            "get": {
+                "tags": [
+                    "device-types"
+                ],
+                "summary": "Show all information for the specified device type.",
+                "operationId": "deviceTypeShow",
+                "parameters": [
+                    {
+                        "name": "device_type_id",
+                        "in": "path",
+                        "description": "The device type ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "device_type"
+                                    ],
+                                    "properties": {
+                                        "device_type": {
+                                            "required": [
+                                                "id",
+                                                "name",
+                                                "description"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Bluetooth device"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Govee H5075 Bluetooth temperature/humidity"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "device-types"
+                ],
+                "summary": "Update the specified device type.",
+                "operationId": "deviceTypeUpdate",
+                "parameters": [
+                    {
+                        "name": "device_type_id",
+                        "in": "path",
+                        "description": "The device type ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 3,
+                                        "example": "Bluetooth device"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Govee H5075 Bluetooth temperature/humidity",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "device-types"
+                ],
+                "summary": "Remove the specified device type from storage.",
+                "operationId": "deviceTypeDestroy",
+                "parameters": [
+                    {
+                        "name": "device_type_id",
+                        "in": "path",
+                        "description": "The device type ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "404": {
+                        "description": "Missing device parameter"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/users/register": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Create a user.",
+                "description": "Register a new user and return an API token with all abilities.",
+                "operationId": "userRegister",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Jane Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane.doe@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secretpassword"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secretpassword"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "My Device"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiToken"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                }
+            }
+        },
+        "/api/users/login": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Login a user.",
+                "description": "Return an API token for the user with all abilities.",
+                "operationId": "userLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane.doe@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "minLength": 8,
+                                        "example": "secretpassword"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "My Device"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiToken"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                }
+            }
+        },
+        "/api/users/logout": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Logout the current user.",
+                "operationId": "userLogout",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "message"
+                                    ],
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Logged out successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/users": {
+            "get": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get details for the currently logged-in user.",
+                "operationId": "userGet",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "user"
+                                    ],
+                                    "properties": {
+                                        "user": {
+                                            "required": [],
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 15
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Jane Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "format": "email",
+                                                    "example": "jane.doe@example.com"
+                                                },
+                                                "email_verified_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-30T13:00:00Z"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-30T13:00:00Z"
+                                                },
+                                                "updated_at": {
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2023-01-30T13:00:00Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ApiToken": {
+                "required": [
+                    "user",
+                    "token",
+                    "token_type"
+                ],
+                "properties": {
+                    "user": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "token": {
+                        "type": "string",
+                        "example": "1|VG5I1lX11p7T7IoWr5wzgUNu66suSmm2V2dIen0V0189d453"
+                    },
+                    "token_type": {
+                        "type": "string",
+                        "example": "Bearer"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "parameter-data",
+            "description": "parameter-data"
+        },
+        {
+            "name": "devices",
+            "description": "devices"
+        },
+        {
+            "name": "device-parameters",
+            "description": "device-parameters"
+        },
+        {
+            "name": "device-types",
+            "description": "device-types"
+        },
+        {
+            "name": "users",
+            "description": "users"
+        }
+    ]
+}
