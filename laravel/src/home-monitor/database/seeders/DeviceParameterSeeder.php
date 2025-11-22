@@ -13,9 +13,9 @@ class DeviceParameterSeeder extends Seeder
     public function run(): void
     {
         // Assumes we have run the Device seeder.
-        $elecDevice = Device::where('serial_number', env('ELECTRICITY_DEVICE_SN'))->firstOrFail();
-        $btDevice01 = Device::where('serial_number', env('BLUETOOTH_DEVICE_01_MAC'))->firstOrFail();
-        $btDevice02 = Device::where('serial_number', env('BLUETOOTH_DEVICE_02_MAC'))->firstOrFail();
+        $elecDevice = Device::where('serial_number', config('services.octopus.device_serial'))->firstOrFail();
+        $btDevice01 = Device::where('serial_number', config('services.bluetooth.dummy_mac_01'))->firstOrFail();
+        $btDevice02 = Device::where('serial_number', config('services.bluetooth.dummy_mac_02'))->firstOrFail();
 
         DeviceParameter::firstOrCreate([
             'device_id' => $elecDevice->id,

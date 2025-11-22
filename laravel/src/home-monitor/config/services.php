@@ -44,5 +44,12 @@ return [
 
     'octopus' => [
         'api_key' => env('ELECTRICITY_SUPPLIER_API_KEY'),
+        'device_serial' => env('ELECTRICITY_DEVICE_SN'),
+        'device_mpan' => env('ELECTRICITY_DEVICE_MPAN'),
+    ],
+
+    'bluetooth' => [
+        'dummy_mac_01' => env('BLUETOOTH_DEVICE_01_MAC'),
+        'dummy_mac_02' => env('BLUETOOTH_DEVICE_02_MAC'),
     ],
 ];

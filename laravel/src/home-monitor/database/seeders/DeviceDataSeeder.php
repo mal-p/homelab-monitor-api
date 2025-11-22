@@ -15,7 +15,7 @@ class DeviceDataSeeder extends Seeder
     public function run(): void
     {
         // Assumes we have run the DeviceParameter seeder.
-        $elecDevice = Device::with('deviceParameters')->where('serial_number', env('ELECTRICITY_DEVICE_SN'))->firstOrFail();
+        $elecDevice = Device::with('deviceParameters')->where('serial_number', config('services.octopus.device_serial'))->firstOrFail();
         $elecConsumptionParam = $elecDevice->deviceParameters[0] ?? null;
 
         if (is_null($elecConsumptionParam)) {

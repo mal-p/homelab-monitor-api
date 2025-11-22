@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->call(DeviceParameterSeeder::class);
 
         // Run dummy data seeder
-        if (env('APP_DEBUG') === true) {
+        if (config('app.debug') === true) {
             $this->call(DeviceDataSeeder::class);
         }
     }

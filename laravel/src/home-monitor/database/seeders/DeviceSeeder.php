@@ -19,8 +19,8 @@ class DeviceSeeder extends Seeder
         Device::firstOrCreate([
             'type_id' => $elecMeterType->id,
             'name' => 'Smart electricity meter',
-            'serial_number' => env('ELECTRICITY_DEVICE_SN'),
-            'mpan' => env('ELECTRICITY_DEVICE_MPAN'),
+            'serial_number' => config('services.octopus.device_serial'),
+            'mpan' => config('services.octopus.device_mpan'),
             'location' => 'Home',
             'is_active' => true,
             'created_at' => now(),
@@ -30,7 +30,7 @@ class DeviceSeeder extends Seeder
         Device::firstOrCreate([
             'type_id' => $btSensorType->id,
             'name' => 'Govee BT Living Room',
-            'serial_number' => env('BLUETOOTH_DEVICE_01_MAC'),
+            'serial_number' => config('services.bluetooth.dummy_mac_01'),
             'location' => 'Living Room',
             'is_active' => true,
             'created_at' => now(),
@@ -40,7 +40,7 @@ class DeviceSeeder extends Seeder
         Device::firstOrCreate([
             'type_id' => $btSensorType->id,
             'name' => 'Govee BT Bedroom',
-            'serial_number' => env('BLUETOOTH_DEVICE_02_MAC'),
+            'serial_number' => config('services.bluetooth.dummy_mac_02'),
             'location' => 'Bedroom',
             'is_active' => true,
             'created_at' => now(),
