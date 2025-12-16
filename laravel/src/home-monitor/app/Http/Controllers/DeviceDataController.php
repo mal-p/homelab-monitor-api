@@ -150,7 +150,7 @@ class DeviceDataController extends Controller
                     if ($alarmChanges['finalAlarmActive'] !== $initialAlarmState) {
                         // Deferred dispatch
                         SendAlarmNotification::dispatch($paramId, $alarmChanges['finalParamValue'])
-                            ->onConnection('deferred')
+                            // ->onConnection('deferred')
                             ->afterCommit();
                     }
                 }
