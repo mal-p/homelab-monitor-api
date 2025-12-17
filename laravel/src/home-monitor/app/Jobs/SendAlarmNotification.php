@@ -37,8 +37,6 @@ class SendAlarmNotification implements ShouldQueue
                 return;
             }
 
-            $humanReadableTime = $parameter->alarm_updated_at->format('d M H:i:s A');
-
             $snsClient = new SnsClient([
                 'region' => config('services.sns.region'),
                 'version' => 'latest',
@@ -48,16 +46,34 @@ class SendAlarmNotification implements ShouldQueue
                 ],
             ]);
 
+            $humanReadableTime = $parameter->alarm_updated_at->format('d M H:i:s A');
+
+            $omparisonOp = '';
+            switch ($parameter->alarm_type) {
+                case 'low':
+                    $omparisonOp = '<';
+                    break;
+                case 'high':
+                    $omparisonOp = '>';
+                    break;
+                default:
+                    $omparisonOp = '';
+            }
+
+            $deviceSnippet = "{$parameter->device->description} - {$parameter->device->location}";
+            $triggerSnippet = "{$this->alarmTriggerValue}{$parameter->unit} {$omparisonOp} {$parameter->alarm_trigger}{$parameter->unit}";
+            $alarmActive = $parameter->alarm_active ? 'active' : 'inactive';
+
             $messageLines = [
-                $parameter->name . ' on ' . $parameter->device->name,
-                'Alarm ' . $parameter->alarm_active ? 'active' : 'inactive',
-                'Trigger: ' . $this->alarmTriggerValue . $parameter->unit,
-                'At: ' . $humanReadableTime,
+                $deviceSnippet,
+                'Alarm ' . $alarmActive,
+                ucfirst(strtolower($parameter->name)) . ': ' . $triggerSnippet,
+                'Triggered: ' . $humanReadableTime,
             ];
 
             $snsClient->publish([
                 'TopicArn' => config('services.sns.topic_arn'),
-                'Message' => implode(".\n", $messageLines),
+                'Message' => implode("\n", $messageLines),
                 'Subject' => "Alarm Triggered: {$parameter->name}",
             ]);
 
