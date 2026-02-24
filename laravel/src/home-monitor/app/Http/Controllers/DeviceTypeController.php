@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\{StoreDeviceTypeRequest, UpdateDeviceTypeRequest};
 use App\Models\DeviceType;
 
 use Illuminate\Database\QueryException;
@@ -57,22 +58,10 @@ class DeviceTypeController extends Controller
      * Store a newly created device type.
      * @see \App\Http\Controllers\Docs\DeviceTypeDocumentation::store() for API documentation
      */
-    public function store(Request $request)
+    public function store(StoreDeviceTypeRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'min:3', 'max:255', 'unique:device_types,name'],
-            'description' => ['nullable', 'string'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                ['errors' => $validator->messages()],
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-            );
-        }
-
         try {
-            $devType = DeviceType::create($validator->validated());
+            $devType = DeviceType::create($request->validated());
 
             return response()->json(
                 ['device_type' => $devType],
@@ -117,27 +106,15 @@ class DeviceTypeController extends Controller
      * Update the specified device type.
      * @see \App\Http\Controllers\Docs\DeviceTypeDocumentation::update() for API documentation
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateDeviceTypeRequest $request, string $id)
     {
         if ($error = $this->validateId($id)) {
             return $error;
         }
 
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'min:3', 'max:255', "unique:device_types,name,{$id}"],
-            'description' => ['nullable', 'string'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                ['errors' => $validator->messages()],
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-            );
-        }
-
         try {
             $devType = DeviceType::findOrFail($id);
-            $devType->update($validator->validated());
+            $devType->update($request->validated());
             
             return response()->noContent(); // return 204
 

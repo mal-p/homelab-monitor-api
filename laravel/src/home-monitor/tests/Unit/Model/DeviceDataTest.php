@@ -18,11 +18,11 @@ describe('Model Configuration', function () {
         expect($this->deviceData->getKeyName())->toBe(null);
     });
 
-    it('has auto-incrementing primary key', function () {
+    it('has no auto-incrementing primary key', function () {
         expect($this->deviceData->getIncrementing())->toBeFalse();
     });
 
-    it('has timestamps enabled', function () {
+    it('has timestamps disabled', function () {
         expect($this->deviceData->usesTimestamps())->toBeFalse();
     });
 
