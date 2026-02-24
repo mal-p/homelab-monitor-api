@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DeviceParameter;
+use App\Http\Controllers\Concerns\GeneratesApiPaginationLinks;
 use App\Http\Requests\{StoreDeviceParameterRequest, UpdateDeviceParameterRequest};
 
 use Illuminate\Database\QueryException;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 
 class DeviceParameterController extends Controller
 {
+    use GeneratesApiPaginationLinks;
+
     private const RESULTS_PER_PAGE = 15;
     private const MAX_PAGE_NUMBER = 1000;
 
@@ -162,35 +165,6 @@ class DeviceParameterController extends Controller
     /*
      * Private helper functions
      */
-    private function generatePaginationLinks(Paginator $resource): array
-    {
-        $links = [];
-        $currentPage = $resource->currentPage();
-        $path = $resource->path();
-
-        if ($resource->hasMorePages()) {
-            $nextPage = $currentPage + 1;
-
-            $links[] = [
-                'href' => "{$path}?page={$nextPage}",
-                'rel' => 'next',
-                'method' => 'GET',
-            ];
-        }
-
-        if ($currentPage > 1) {
-            $prevPage = $currentPage - 1;
-
-            $links[] = [
-                'href' => "{$path}?page={$prevPage}",
-                'rel' => 'prev',
-                'method' => 'GET',
-            ];
-        }
-
-        return $links;
-    }
-
     private function notFoundResponse(string $id): JsonResponse
     {
         return response()->json(
