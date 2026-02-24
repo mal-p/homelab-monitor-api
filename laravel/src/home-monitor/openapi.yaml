@@ -205,6 +205,7 @@ paths:
                   nullable: true
                 description:
                   type: string
+                  maxLength: 2000
                   example: ''
                   nullable: true
                 is_active:
@@ -320,6 +321,7 @@ paths:
                   nullable: true
                 description:
                   type: string
+                  maxLength: 2000
                   example: ''
                   nullable: true
                 is_active:
@@ -666,6 +668,7 @@ paths:
                   example: 'Bluetooth device'
                 description:
                   type: string
+                  maxLength: 2000
                   example: 'Govee H5075 Bluetooth temperature/humidity'
                   nullable: true
               type: object
@@ -757,6 +760,7 @@ paths:
                   example: 'Bluetooth device'
                 description:
                   type: string
+                  maxLength: 2000
                   example: 'Govee H5075 Bluetooth temperature/humidity'
                   nullable: true
               type: object
