@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\{Response};
+use Illuminate\Http\Response;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreDeviceTypeRequest extends FormRequest
@@ -26,7 +26,7 @@ class StoreDeviceTypeRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'min:3', 'max:255', 'unique:device_types,name'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:2000'],
         ];
     }
 
@@ -51,7 +51,7 @@ class StoreDeviceTypeRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      */
-    protected function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
             response()->json(

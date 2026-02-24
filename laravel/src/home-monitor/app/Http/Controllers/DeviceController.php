@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Device;
 use App\Http\Controllers\Concerns\GeneratesApiPaginationLinks;
 use App\Http\Controllers\Concerns\GeneratesDatabaseErrorResponses;
+use App\Http\Requests\{StoreDeviceRequest, UpdateDeviceRequest};
 
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\{JsonResponse, Request, Response};
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Validator;
 
 class DeviceController extends Controller
 {
@@ -60,27 +60,10 @@ class DeviceController extends Controller
      * Store a newly created device.
      * @see \App\Http\Controllers\Docs\DeviceDocumentation::store() for API documentation
      */
-    public function store(Request $request)
+    public function store(StoreDeviceRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'type_id' => ['required', 'integer', 'exists:pgsql.device_types,id'],
-            'name' => ['required', 'string', 'min:3', 'max:255'],
-            'serial_number' => ['required', 'string', 'min:1', 'max:100', 'unique:devices,serial_number'],
-            'mpan' => ['nullable', 'string', 'max:100', 'unique:devices,mpan'],
-            'location' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'is_active' => ['required', 'boolean'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                ['errors' => $validator->messages()],
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-            );
-        }
-
         try {
-            $device = Device::create($validator->validated());
+            $device = Device::create($request->validated());
             // Refetch device to load (empty) parameters and type relationship
             $device = Device::with('deviceParameters')->find($device->id);
 
@@ -143,36 +126,15 @@ class DeviceController extends Controller
      * Update the specified device.
      * @see \App\Http\Controllers\Docs\DeviceDocumentation::update() for API documentation
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateDeviceRequest $request, string $id)
     {
-        // curl -X POST http://127.0.0.1/devices/1 \
-        //   -H "Content-Type: application/json" \
-        //   -d '{"_method":"PUT","name":"Updated Device"}'
-
         if ($error = $this->validateId($id)) {
             return $error;
         }
 
-        $validator = Validator::make($request->all(), [
-            'type_id' => ['required', 'integer', 'exists:pgsql.device_types,id'],
-            'name' => ['required', 'string', 'min:3', 'max:255'],
-            'serial_number' => ['required', 'string', 'min:1', 'max:100', "unique:devices,serial_number,{$id}"],
-            'mpan' => ['nullable', 'string', 'max:100', "unique:devices,mpan,{$id}"],
-            'location' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'is_active' => ['required', 'boolean'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                ['errors' => $validator->messages()],
-                Response::HTTP_UNPROCESSABLE_ENTITY,
-            );
-        }
-
         try {
             $device = Device::findOrFail($id);
-            $device->update($validator->validated());
+            $device->update($request->validated());
             
             return response()->noContent(); // return 204
 
@@ -189,10 +151,6 @@ class DeviceController extends Controller
      */
     public function destroy(string $id)
     {
-        // curl -X POST http://127.0.0.1/devices/1 \
-        //   -H "Content-Type: application/json" \
-        //   -d '{"_method":"DELETE","name":"Deleted Device"}'
-
         if ($error = $this->validateId($id)) {
             return $error;
         }

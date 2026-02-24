@@ -7,7 +7,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Response;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class UpdateDeviceTypeRequest extends FormRequest
+class StoreDeviceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -17,13 +17,6 @@ class UpdateDeviceTypeRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'id' => $this->route('id'),
-        ]);
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -31,31 +24,15 @@ class UpdateDeviceTypeRequest extends FormRequest
      */
     public function rules(): array
     {
-        $id = $this->route('id');
-
         return [
-            'id' => ['required', 'integer', 'exists:pgsql.device_types,id'],
-            'name' => ['required', 'string', 'min:3', 'max:255', "unique:device_types,name,{$id}"],
+            'type_id' => ['required', 'integer', 'exists:pgsql.device_types,id'],
+            'name' => ['required', 'string', 'min:3', 'max:255'],
+            'serial_number' => ['required', 'string', 'min:1', 'max:100', 'unique:devices,serial_number'],
+            'mpan' => ['nullable', 'string', 'max:100', 'unique:devices,mpan'],
+            'location' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'is_active' => ['required', 'boolean'],
         ];
-    }
-
-    /**
-     * Additional validation.
-     */
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-
-            $name = $validator->safe()->name;
-
-            if (is_string($name) && $name !== '' && !preg_match('/^[a-zA-Z0-9\+\-\_\= ]+$/', $name)) {
-                $validator->errors()->add(
-                    'name',
-                    "The name may only contain alphanumeric characters, spaces and + - _ =",
-                );
-            }
-        });
     }
 
     /**

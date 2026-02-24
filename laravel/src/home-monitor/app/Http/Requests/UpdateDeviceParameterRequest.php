@@ -6,7 +6,7 @@ use App\Models\DeviceParameter;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\{Response};
+use Illuminate\Http\Response;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
@@ -39,7 +39,7 @@ class UpdateDeviceParameterRequest extends FormRequest
     /**
      * Handle a failed validation attempt.
      */
-    protected function failedValidation(Validator $validator)
+    protected function failedValidation(Validator $validator): void
     {
         throw new HttpResponseException(
             response()->json(

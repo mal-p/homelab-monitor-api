@@ -85,7 +85,7 @@ class DeviceTypeDocumentation
             required: ['name'],
             properties: [
                 new OA\Property(property: 'name', type: 'string', minLength: 3, maxLength: 255, example: 'Bluetooth device'),
-                new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Govee H5075 Bluetooth temperature/humidity'),
+                new OA\Property(property: 'description', type: 'string', nullable: true, maxLength: 2000, example: 'Govee H5075 Bluetooth temperature/humidity'),
             ],
         ),
     )]
@@ -184,7 +184,7 @@ class DeviceTypeDocumentation
             required: ['name'],
             properties: [
                 new OA\Property(property: 'name', type: 'string', minLength: 3, maxLength: 255, example: 'Bluetooth device'),
-                new OA\Property(property: 'description', type: 'string', nullable: true, example: 'Govee H5075 Bluetooth temperature/humidity'),
+                new OA\Property(property: 'description', type: 'string', nullable: true, maxLength: 2000, example: 'Govee H5075 Bluetooth temperature/humidity'),
             ],
         ),
     )]
