@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\DeviceType;
 use App\Http\Controllers\Concerns\GeneratesApiPaginationLinks;
+use App\Http\Controllers\Concerns\GeneratesDatabaseErrorResponses;
 use App\Http\Requests\{StoreDeviceTypeRequest, UpdateDeviceTypeRequest};
 
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\{JsonResponse, Request, Response};
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Log;
 
 class DeviceTypeController extends Controller
 {
-    use GeneratesApiPaginationLinks;
+    use GeneratesApiPaginationLinks, GeneratesDatabaseErrorResponses;
 
     private const RESULTS_PER_PAGE = 15;
     private const MAX_PAGE_NUMBER = 1000;
@@ -101,7 +101,7 @@ class DeviceTypeController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'show', $id);
+            return $this->databaseErrorResponse($e, 'show', ['device_type_id' => $id]);
         }
     }
 
@@ -124,7 +124,7 @@ class DeviceTypeController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'update', $id);
+            return $this->databaseErrorResponse($e, 'update', ['device_type_id' => $id]);
         }
     }
 
@@ -147,7 +147,7 @@ class DeviceTypeController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'destroy', $id);
+            return $this->databaseErrorResponse($e, 'destroy', ['device_type_id' => $id]);
         }
     }
 
@@ -159,20 +159,6 @@ class DeviceTypeController extends Controller
         return response()->json(
             ['errors' => ['device_type' => ["Device type with ID {$id} not found"]]],
             Response::HTTP_NOT_FOUND,
-        );
-    }
-
-    private function databaseErrorResponse(QueryException $e, string $method, string|null $id = null): JsonResponse
-    {
-        Log::error('Database operation failed', [
-            'route' => "DeviceTypeController::{$method}",
-            'device_type_id' => $id,
-            'exception' => $e->getMessage(),
-        ]);
-
-        return response()->json(
-            ['errors' => ['server' => ['Database error occurred']]],
-            Response::HTTP_INTERNAL_SERVER_ERROR,
         );
     }
 

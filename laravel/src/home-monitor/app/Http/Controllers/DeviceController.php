@@ -4,16 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Device;
 use App\Http\Controllers\Concerns\GeneratesApiPaginationLinks;
+use App\Http\Controllers\Concerns\GeneratesDatabaseErrorResponses;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\{JsonResponse, Request, Response};
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\{Log, Validator};
+use Illuminate\Support\Facades\Validator;
 
 class DeviceController extends Controller
 {
-    use GeneratesApiPaginationLinks;
+    use GeneratesApiPaginationLinks, GeneratesDatabaseErrorResponses;
 
     private const RESULTS_PER_PAGE = 15;
     private const MAX_PAGE_NUMBER = 1000;
@@ -134,7 +135,7 @@ class DeviceController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'show', $id);
+            return $this->databaseErrorResponse($e, 'show', ['device_id' => $id]);
         }
     }
 
@@ -178,7 +179,7 @@ class DeviceController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'update', $id);
+            return $this->databaseErrorResponse($e, 'update', ['device_id' => $id]);
         }
     }
 
@@ -205,7 +206,7 @@ class DeviceController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'destroy', $id);
+            return $this->databaseErrorResponse($e, 'destroy', ['device_id' => $id]);
         }
     }
 
@@ -217,20 +218,6 @@ class DeviceController extends Controller
         return response()->json(
             ['errors' => ['device' => ["Device with ID {$id} not found"]]],
             Response::HTTP_NOT_FOUND,
-        );
-    }
-
-    private function databaseErrorResponse(QueryException $e, string $method, string|null $id = null): JsonResponse
-    {
-        Log::error('Database operation failed', [
-            'route' => "DeviceController::{$method}",
-            'device_id' => $id,
-            'exception' => $e->getMessage(),
-        ]);
-
-        return response()->json(
-            ['errors' => ['server' => ['Database error occurred']]],
-            Response::HTTP_INTERNAL_SERVER_ERROR,
         );
     }
 

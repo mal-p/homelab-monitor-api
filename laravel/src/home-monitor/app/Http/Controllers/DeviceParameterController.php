@@ -4,17 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\DeviceParameter;
 use App\Http\Controllers\Concerns\GeneratesApiPaginationLinks;
+use App\Http\Controllers\Concerns\GeneratesDatabaseErrorResponses;
 use App\Http\Requests\{StoreDeviceParameterRequest, UpdateDeviceParameterRequest};
 
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\{JsonResponse, Request, Response};
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Log;
 
 class DeviceParameterController extends Controller
 {
-    use GeneratesApiPaginationLinks;
+    use GeneratesApiPaginationLinks, GeneratesDatabaseErrorResponses;
 
     private const RESULTS_PER_PAGE = 15;
     private const MAX_PAGE_NUMBER = 1000;
@@ -107,7 +107,7 @@ class DeviceParameterController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'show', $id);
+            return $this->databaseErrorResponse($e, 'show', ['device_parameter_id' => $id]);
         }
     }
 
@@ -135,7 +135,7 @@ class DeviceParameterController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'update', $id);
+            return $this->databaseErrorResponse($e, 'update', ['device_parameter_id' => $id]);
         }
     }
 
@@ -158,7 +158,7 @@ class DeviceParameterController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'destroy', $id);
+            return $this->databaseErrorResponse($e, 'destroy', ['device_parameter_id' => $id]);
         }
     }
 
@@ -170,20 +170,6 @@ class DeviceParameterController extends Controller
         return response()->json(
             ['errors' => ['device_parameter' => ["Parameter with ID {$id} not found"]]],
             Response::HTTP_NOT_FOUND
-        );
-    }
-
-    private function databaseErrorResponse(QueryException $e, string $method, string|null $id = null): JsonResponse
-    {
-        Log::error('Database operation failed', [
-            'route' => "DeviceParameterController::{$method}",
-            'device_parameter_id' => $id,
-            'exception' => $e->getMessage(),
-        ]);
-
-        return response()->json(
-            ['errors' => ['server' => ['Database error occurred']]],
-            Response::HTTP_INTERNAL_SERVER_ERROR
         );
     }
 

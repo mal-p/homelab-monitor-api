@@ -2,17 +2,20 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\SendAlarmNotification;
+use App\Http\Controllers\Concerns\GeneratesDatabaseErrorResponses;
 use App\Models\{DeviceData, DeviceParameter};
 use App\Services\AlarmService;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\{JsonResponse, Request, Response};
-use Illuminate\Support\Facades\{DB, Log, Validator};
+use Illuminate\Support\Facades\{DB, Validator};
 use Illuminate\Validation\Rule;
 
 class DeviceDataController extends Controller
 {
+    use GeneratesDatabaseErrorResponses;
+
     public const int MAX_STORAGE_INSERT_ATTEMPTS = 2;
     public const int MAX_STORAGE_READINGS = 200;
 
@@ -71,7 +74,7 @@ class DeviceDataController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($paramId);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'bucket', $paramId);
+            return $this->databaseErrorResponse($e, 'bucket', ['device_parameter_id' => $paramId]);
         }
     }
 
@@ -170,7 +173,7 @@ class DeviceDataController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($paramId);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'store', $paramId);
+            return $this->databaseErrorResponse($e, 'store', ['device_parameter_id' => $paramId]);
         }
     }
 
@@ -182,20 +185,6 @@ class DeviceDataController extends Controller
         return response()->json(
             ['errors' => ['device_parameter' => ["Parameter with ID {$id} not found"]]],
             Response::HTTP_NOT_FOUND,
-        );
-    }
-
-    private function databaseErrorResponse(QueryException $e, string $method, string|null $id = null): JsonResponse
-    {
-        Log::error('Database operation failed', [
-            'route' => "DeviceDataController::{$method}",
-            'device_parameter_id' => $id,
-            'exception' => $e->getMessage(),
-        ]);
-
-        return response()->json(
-            ['errors' => ['server' => ['Database error occurred']]],
-            Response::HTTP_INTERNAL_SERVER_ERROR,
         );
     }
 
