@@ -19,6 +19,11 @@ A Laravel-based API for monitoring and tracking home devices with time-series da
 cd homelab-monitor-api
 docker compose build
 ```
+If using rootless Podman, use the Podman override compose file:
+```bash
+podman compose -f docker-compose.yml -f docker-compose.podman.yml build
+```
+
 If running on a Raspberry Pi you may need to add `cgroup_enable=memory` to `/boot/firmware/cmdline.txt`.  
 **NOTE** the container build step takes ~20 minutes on a Raspberry Pi 4.
 
@@ -33,6 +38,11 @@ Adjust resource limits in `docker-compose.yml` as needed:
 Running `docker compose up -d` will start:
 - `php_apache`: PHP 8.4 + Apache web server
 - `postgres`: PostgreSQL with TimescaleDB
+
+If using rootless Podman, start with:
+```bash
+podman compose -f docker-compose.yml -f docker-compose.podman.yml up -d --build
+```
 
 PostgreSQL data is stored in the `timescale_pg_volume` Docker volume.
 

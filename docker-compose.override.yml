@@ -1,0 +1,4 @@
+services:
+    postgres:
+        volumes:
+            - timescale_pg_volume:/var/lib/postgresql/data/

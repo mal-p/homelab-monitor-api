@@ -1,4 +1,4 @@
-FROM php:8.4-apache
+FROM docker.io/php:8.4-apache
 
 #
 # PHP
@@ -18,7 +18,7 @@ RUN docker-php-ext-configure intl \
     && docker-php-ext-install intl
 
 # Install PHP composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --from=docker.io/composer:latest /usr/bin/composer /usr/local/bin/composer
 
 # Configure PHP
 COPY php_api_config.ini /usr/local/etc/php/conf.d/php_api_config.ini

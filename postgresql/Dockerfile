@@ -1,4 +1,4 @@
-FROM timescale/timescaledb:latest-pg17
+FROM docker.io/timescale/timescaledb:latest-pg17
 
 # Locale
 ENV LANG en_GB.UTF-8
