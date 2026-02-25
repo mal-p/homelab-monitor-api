@@ -9,14 +9,27 @@ use Illuminate\Support\Facades\Log;
 trait GeneratesDatabaseErrorResponses
 {
     /**
-     * Log database exception and retrun an opaque JSON response.
+     * Log database exception and returns an opaque JSON response.
      */
     protected function databaseErrorResponse(QueryException $e, string $method, array $context = []): JsonResponse
     {
-        Log::error('Database operation failed', array_merge([
+        $baseContext = array_merge([
             'route' => class_basename(static::class) . "::{$method}",
-            'exception' => $e->getMessage(),
-        ], $context));
+            'exception_class' => $e::class,
+
+            'sql' => $e->getSql(),
+            'binding_count' => is_array($e->getBindings()) ? count($e->getBindings()) : null,
+
+            'thrown' => [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ],
+        ], $context);
+
+        Log::error('Database operation failed', $baseContext);
+
+        // debug logs may include sensitive info
+        Log::debug('Database operation failed (stacktrace)', ['exception' => $e]);
 
         return response()->json(
             ['errors' => ['server' => ['Database error occurred']]],

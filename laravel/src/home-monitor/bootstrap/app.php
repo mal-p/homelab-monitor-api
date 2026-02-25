@@ -18,10 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Force JSON exception responses for API routes, even without Accept: application/json
-        $exceptions->shouldRenderJsonWhen(function ($request, $e) {
+        // Force JSON responses for API routes, even without `Accept: application/json` header
+        $exceptions->shouldRenderJsonWhen(function (Request $request, \Throwable $e) {
             return $request->is('api/*') || $request->expectsJson();
         });
+
+        // Don't log unauthenticated requests
+        $exceptions->dontReport(AuthenticationException::class);
+        $exceptions->dontReport(RouteNotFoundException::class);
+        // just return json 401
         $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json(
