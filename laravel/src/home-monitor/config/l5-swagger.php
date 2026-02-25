@@ -215,6 +215,12 @@ return [
                     'in' => 'header', // The location of the API key. Valid values are "query" or "header".
                 ],
                 */
+                'api_key' => [
+                    'type' => 'http',
+                    'scheme' => 'bearer',
+                    'bearerFormat' => 'Sanctum',
+                    'description' => 'Paste the token only; Swagger UI will send: Authorization: Bearer <token>',
+                ],
             ],
             'security' => [
                 /*
@@ -229,6 +235,7 @@ return [
 
                     'passport' => []
                     */
+                    'api_key' => [],
                 ],
             ],
         ],

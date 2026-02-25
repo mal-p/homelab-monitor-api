@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: 'Home-monitor API'
   description: 'A small home monitoring API for logging electricity usage, temperature etc.'
-  version: 1.1.0
+  version: 1.1.1
 paths:
   '/api/device-parameters/{device_parameter_id}/data':
     get:
@@ -858,6 +858,7 @@ paths:
           description: 'Validation exception'
         '500':
           description: 'Database exception'
+      security: []
   /api/users/login:
     post:
       tags:
@@ -902,8 +903,9 @@ paths:
           description: 'Validation exception'
         '500':
           description: 'Database exception'
+      security: []
   /api/users/logout:
-    post:
+    get:
       tags:
         - users
       summary: 'Logout the current user.'

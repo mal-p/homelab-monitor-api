@@ -14,6 +14,7 @@ class UserDocumentation
         tags: ['users'],
         operationId: 'userRegister',
         description: "Register a new user and return an API token with all abilities.",
+        security: [],
     )]
     #[OA\RequestBody(
         required: true,
@@ -55,6 +56,7 @@ class UserDocumentation
         tags: ['users'],
         operationId: 'userLogin',
         description: "Return an API token for the user with all abilities.",
+        security: [],
     )]
     #[OA\RequestBody(
         required: true,
@@ -80,7 +82,7 @@ class UserDocumentation
     /**
      * Logout the current user.
      */
-    #[OA\Post(
+    #[OA\Get(
         path: '/api/users/logout',
         tags: ['users'],
         operationId: 'userLogout',
