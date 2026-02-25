@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\{DeviceController, DeviceDataController, DeviceParameterController, DeviceTypeController};
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RedirectController;
 use Illuminate\Support\Facades\Route;
 
 // Login/Register routes also create tokens
@@ -51,4 +52,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [DeviceController::class, 'update'])->name('update');
         Route::delete('/{id}', [DeviceController::class, 'destroy'])->name('destroy');
     });
+
+    Route::fallback([RedirectController::class, 'unknownApiRoute']);
 });
