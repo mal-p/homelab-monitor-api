@@ -53,7 +53,7 @@ class DeviceTypeController extends Controller
             );
 
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'index');
+            return $this->databaseErrorResponse($e, __FUNCTION__);
         }
     }
 
@@ -72,7 +72,7 @@ class DeviceTypeController extends Controller
             );
 
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'store');
+            return $this->databaseErrorResponse($e, __FUNCTION__);
         }
     }
 
@@ -101,7 +101,7 @@ class DeviceTypeController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'show', ['device_type_id' => $id]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_type_id' => $id]);
         }
     }
 
@@ -124,7 +124,7 @@ class DeviceTypeController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'update', ['device_type_id' => $id]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_type_id' => $id]);
         }
     }
 
@@ -147,7 +147,7 @@ class DeviceTypeController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'destroy', ['device_type_id' => $id]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_type_id' => $id]);
         }
     }
 

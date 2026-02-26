@@ -77,7 +77,7 @@ class DeviceDataController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($paramId);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'bucket', ['device_parameter_id' => $paramId]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_parameter_id' => $paramId]);
         }
     }
 
@@ -176,7 +176,7 @@ class DeviceDataController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($paramId);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'store', ['device_parameter_id' => $paramId]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_parameter_id' => $paramId]);
         }
     }
 

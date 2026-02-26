@@ -53,7 +53,7 @@ class DeviceParameterController extends Controller
             );
 
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'index');
+            return $this->databaseErrorResponse($e, __FUNCTION__);
         }
     }
 
@@ -72,7 +72,7 @@ class DeviceParameterController extends Controller
             );
 
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'store');
+            return $this->databaseErrorResponse($e, __FUNCTION__);
         }
     }
 
@@ -107,7 +107,7 @@ class DeviceParameterController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'show', ['device_parameter_id' => $id]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_parameter_id' => $id]);
         }
     }
 
@@ -135,7 +135,7 @@ class DeviceParameterController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'update', ['device_parameter_id' => $id]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_parameter_id' => $id]);
         }
     }
 
@@ -158,7 +158,7 @@ class DeviceParameterController extends Controller
         } catch (ModelNotFoundException $e) {
             return $this->notFoundResponse($id);
         } catch (QueryException $e) {
-            return $this->databaseErrorResponse($e, 'destroy', ['device_parameter_id' => $id]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['device_parameter_id' => $id]);
         }
     }
 
