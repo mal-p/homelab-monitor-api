@@ -38,9 +38,9 @@ class DeviceDataDocumentation
     #[OA\Parameter(
         name: 'end',
         in: 'query',
-        required: true,
-        description: 'Time interval end',
-        schema: new OA\Schema(type: 'string', format: 'date-time'),
+        required: false,
+        description: 'Time interval end (defaults to now when omitted)',
+        schema: new OA\Schema(type: 'string', format: 'date-time', nullable: true),
         example: '2023-01-30T17:00:00Z'
     )]
     #[OA\Parameter(

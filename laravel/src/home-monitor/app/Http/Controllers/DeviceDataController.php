@@ -39,7 +39,7 @@ class DeviceDataController extends Controller
 
         $validator = Validator::make($request->all(), [
             'start' => ['required', 'string', Rule::date()->format($dateFormat)],
-            'end' => ['required', 'string', Rule::date()->format($dateFormat), 'after:start'],
+            'end' => ['nullable', 'string', Rule::date()->format($dateFormat), 'after:start'],
             'bucket_size' => ['nullable', 'integer', "min:{$minBucket}", "max:{$maxBucket}"],
         ]);
 
@@ -53,7 +53,10 @@ class DeviceDataController extends Controller
         $validated = $validator->validated();
 
         $start = \DateTime::createFromFormat($dateFormat, $validated['start']);
-        $end = \DateTime::createFromFormat($dateFormat, $validated['end']);
+        $endInput = $validated['end'] ?? null;
+        $end = $endInput
+            ? \DateTime::createFromFormat($dateFormat, $endInput)
+            : new \DateTime();
         $bucketSizeMinutes = $validated['bucket_size'] ?? 60;
 
         try {
