@@ -29,7 +29,9 @@ trait GeneratesDatabaseErrorResponses
         Log::error('Database operation failed', $baseContext);
 
         // debug logs may include sensitive info
-        Log::debug('Database operation failed (stacktrace)', ['exception' => $e]);
+        if (config('app.debug')) {
+            Log::debug('Database operation failed (stacktrace)', ['exception' => $e]);
+        }
 
         return response()->json(
             ['errors' => ['server' => ['Database error occurred']]],

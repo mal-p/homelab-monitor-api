@@ -5,7 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\RedirectController;
 use Illuminate\Support\Facades\Route;
 
-// Login/Register routes also create tokens
+// Login/Register routes create tokens
 Route::post('/users/login', [UserController::class, 'login'])
     ->name('users.login')
     ->middleware('throttle:5,1');
@@ -15,9 +15,10 @@ Route::post('/users/register', [UserController::class, 'create'])
 
 Route::middleware('auth:sanctum')->group(function () {
     // User routes
-    Route::name('users.')->prefix('users')->group(function () {
+    Route::name('users.me.')->prefix('users/me')->group(function () {
         Route::get('/', [UserController::class, 'show'])->name('show');
-        Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+        Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+        Route::post('/logout-other-tokens', [UserController::class, 'logoutOtherTokens'])->name('logout-other-tokens');
     });
 
     // DeviceType routes

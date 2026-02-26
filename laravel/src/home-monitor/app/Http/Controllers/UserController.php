@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Http\Controllers\Concerns\GeneratesDatabaseErrorResponses;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Http\{Request, Response};
-use Illuminate\Support\Facades\{Hash, Log, Validator};
+use Illuminate\Support\Facades\{Hash, Validator};
 
 class UserController extends Controller
 {
+    use GeneratesDatabaseErrorResponses;
+
     const API_TOKEN_NAME_PREFIX = 'homelab-';
 
     /**
@@ -47,15 +50,7 @@ class UserController extends Controller
             );
 
         } catch (QueryException $e) {
-            Log::error('Database insert failed', [
-                'route' => 'UserController::register',
-                'exception' => $e->getMessage(),
-            ]);
-
-            return response()->json(
-                ['errors' => ['server' => ['Database error occurred']]],
-                Response::HTTP_INTERNAL_SERVER_ERROR,
-            );
+            return $this->databaseErrorResponse($e, __FUNCTION__);
         }
     }
 
@@ -96,15 +91,7 @@ class UserController extends Controller
             );
 
         } catch (QueryException $e) {
-            Log::error('Database update failed', [
-                'route' => 'UserController::login',
-                'exception' => $e->getMessage(),
-            ]);
-
-            return response()->json(
-                ['errors' => ['server' => ['Database error occurred']]],
-                Response::HTTP_INTERNAL_SERVER_ERROR,
-            );
+            return $this->databaseErrorResponse($e, __FUNCTION__);
         }
     }
 
@@ -114,24 +101,43 @@ class UserController extends Controller
      */
     public function logout(Request $request)
     {
+        $userId = $request->user()?->id;
+
         try {
             $request->user()->currentAccessToken()->delete();
+
             return response()->json(
                 ['message' => 'Logged out successfully'],
                 Response::HTTP_OK,
             );
 
         } catch (QueryException $e) {
-            Log::error('Database update failed', [
-                'route' => 'UserController::logout',
-                'user_id' => $request->user()->id,
-                'exception' => $e->getMessage(),
-            ]);
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['user_id' => $userId,]);
+        }
+    }
+
+    /**
+     * Logout all other tokens for the current user.
+     * @see \App\Http\Controllers\Docs\UserDocumentation::logoutOtherTokens() for API documentation
+     */
+    public function logoutOtherTokens(Request $request)
+    {
+        $user = $request->user();
+        $userId = $user?->id;
+
+        try {
+            $currentAccessToken = $user->currentAccessToken();
+            $revokedCount = $user->tokens()->whereNot('id', $currentAccessToken->id)->delete();
 
             return response()->json(
-                ['errors' => ['server' => ['Database error occurred']]],
-                Response::HTTP_INTERNAL_SERVER_ERROR,
+                [
+                    'message' => 'Other tokens logged out successfully',
+                    'revoked_count' => $revokedCount,
+                ],
+                Response::HTTP_OK,
             );
+        } catch (QueryException $e) {
+            return $this->databaseErrorResponse($e, __FUNCTION__, ['user_id' => $userId]);
         }
     }
 
@@ -141,8 +147,14 @@ class UserController extends Controller
      */
     public function show(Request $request)
     {
+        $user = $request->user();
+
+        if ($user) {
+            $user->makeHidden(['created_at', 'updated_at', 'email_verified_at']);
+        }
+
         return response()->json(
-            ['user' => $request->user()],
+            ['user' => $user],
             Response::HTTP_OK,
         );
     }

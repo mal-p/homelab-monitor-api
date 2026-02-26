@@ -82,10 +82,11 @@ class UserDocumentation
     /**
      * Logout the current user.
      */
-    #[OA\Get(
-        path: '/api/users/logout',
+    #[OA\Post(
+        path: '/api/users/me/logout',
         tags: ['users'],
-        operationId: 'userLogout',
+        operationId: 'userMeLogout',
+        description: 'Revoke the current API token for the authenticated user.',
         security: [
             ['api_key' => []],
         ],
@@ -101,17 +102,43 @@ class UserDocumentation
             ],
         )
     )]
-    #[OA\Response(response: 422, description: 'Validation exception')]
     #[OA\Response(response: 500, description: 'Database exception')]
     public static function logout() {}
+
+    /**
+     * Logout all other tokens for the current user.
+     */
+    #[OA\Post(
+        path: '/api/users/me/logout-other-tokens',
+        tags: ['users'],
+        operationId: 'userMeLogoutOtherTokens',
+        description: 'Revoke all other API tokens for the currently authenticated user, keeping the current token active.',
+        security: [
+            ['api_key' => []],
+        ],
+    )]
+    #[OA\Response(
+        response: 200,
+        description: 'OK',
+        content: new OA\JsonContent(
+            type: 'object',
+            required: ['message', 'revoked_count'],
+            properties: [
+                new OA\Property(property: 'message', type: 'string', example: 'Other tokens logged out successfully'),
+                new OA\Property(property: 'revoked_count', type: 'integer', example: 3),
+            ],
+        )
+    )]
+    #[OA\Response(response: 500, description: 'Database exception')]
+    public static function logoutOtherTokens() {}
 
     /**
      * Get details for the currently logged-in user.
      */
     #[OA\Get(
-        path: '/api/users',
+        path: '/api/users/me',
         tags: ['users'],
-        operationId: 'userGet',
+        operationId: 'userMeShow',
         security: [
             ['api_key' => []],
         ],
@@ -131,14 +158,10 @@ class UserDocumentation
                         new OA\Property(property: 'id', type: 'integer', example: 15),
                         new OA\Property(property: 'name', type: 'string', example: 'Jane Doe'),
                         new OA\Property(property: 'email', type: 'string', format: 'email', example: 'jane.doe@example.com'),
-                        new OA\Property(property: 'email_verified_at', type: 'string', format: 'date-time', example: '2023-01-30T13:00:00Z'),
-                        new OA\Property(property: 'created_at', type: 'string', format: 'date-time', example: '2023-01-30T13:00:00Z'),
-                        new OA\Property(property: 'updated_at', type: 'string', format: 'date-time', example: '2023-01-30T13:00:00Z'),
                     ],
                 ),
             ]
         ),
     )]
-    #[OA\Response(response: 422, description: 'Validation exception')]
     public static function show() {}
 }
