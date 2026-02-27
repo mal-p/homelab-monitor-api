@@ -111,4 +111,59 @@ class DeviceParameter extends Model
             ];
         }, $logs);
     }
+
+    /**
+     * Fetch the latest reading and alarm state for an array of DeviceParameter ids.
+     *
+     * @param array $deviceParameterIds  Validated ids
+     */
+    public static function heartbeat(array $deviceParameterIds): array
+    {
+        $paramIds = array_values(array_map('intval', $deviceParameterIds));
+        $paramIdsPgArray = '{' . implode(',', $paramIds) . '}';
+
+        $resultRows = DB::select(
+            "WITH latest_data AS (
+                SELECT DISTINCT ON (dd.parameter_id)
+                    dd.parameter_id,
+                    dd.time,
+                    dd.value
+                FROM device_data AS dd
+                WHERE dd.parameter_id = ANY (?::int[])
+                ORDER BY dd.parameter_id, dd.time DESC
+            )
+            SELECT
+                dp.id,
+                dp.name,
+                dp.unit,
+                dp.alarm_type,
+                dp.alarm_active,
+                ld.time            AS latest_time,
+                ld.value           AS latest_value
+            FROM device_parameters AS dp
+            LEFT JOIN latest_data  AS ld
+                ON dp.id = ld.parameter_id
+            WHERE dp.id = ANY (?::int[])
+            ORDER BY dp.id ASC;",
+
+            [$paramIdsPgArray, $paramIdsPgArray]
+        );
+
+        return array_map(function ($row) {
+            $rowAsArray = (array) $row;
+
+            $latestTime  = $rowAsArray['latest_time'] ?? null;
+            $latestValue = $rowAsArray['latest_value'] ?? null;
+
+            return [
+                'device_parameter_id' => intval($rowAsArray['id']),
+                'name' => $rowAsArray['name'],
+                'unit' => $rowAsArray['unit'],
+                'alarm_type' => $rowAsArray['alarm_type'],
+                'alarm_active' => (bool) $rowAsArray['alarm_active'],
+                'latest_time' => $latestTime,
+                'latest_value' => $latestValue === null ? null : floatval($latestValue),
+            ];
+        }, $resultRows);
+    }
 }

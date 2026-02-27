@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [DeviceDataController::class, 'bucket'])->name('bucket');
         Route::post('/', [DeviceDataController::class, 'store'])->name('store');
     });
+    Route::post('/device-parameters/heartbeat', [DeviceDataController::class, 'heartbeat'])->name('device-parameters.heartbeat');
 
     // DeviceParameter routes
     Route::name('device-parameters.')->prefix('device-parameters')->group(function () {

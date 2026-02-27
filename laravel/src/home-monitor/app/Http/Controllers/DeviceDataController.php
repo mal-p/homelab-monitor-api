@@ -18,16 +18,56 @@ class DeviceDataController extends Controller
 
     public const int MAX_STORAGE_INSERT_ATTEMPTS = 2;
     public const int MAX_STORAGE_READINGS = 200;
+    public const int MAX_HEARTBEAT_PARAMETERS = 100;
 
     public function __construct(
         private AlarmService $alarmService,
     ) {}
 
     /**
+     * Fetch the latest reading and alarm state for an array of DeviceParameters.
+     * @see \App\Http\Controllers\Docs\DeviceDataDocumentation::heartbeat() for API documentation
+     */
+    public function heartbeat(Request $request): JsonResponse
+    {
+        $maxParameters = self::MAX_HEARTBEAT_PARAMETERS;
+
+        $validator = Validator::make($request->all(), [
+            'device_parameter_ids' => ['required', 'array', 'min:1', "max:{$maxParameters}"],
+            'device_parameter_ids.*' => ['required', 'integer', 'distinct', 'exists:pgsql.device_parameters,id'],
+        ]);
+
+        if ($validator->stopOnFirstFailure()->fails()) {
+            return response()->json(
+                ['errors' => $validator->messages()],
+                Response::HTTP_UNPROCESSABLE_ENTITY,
+            );
+        }
+
+        $deviceParameterIds = $validator->validated()['device_parameter_ids'];
+
+        try {
+            $heartbeat = DeviceParameter::heartbeat($deviceParameterIds);
+
+            return response()->json(
+                ['heartbeat' => $heartbeat],
+                Response::HTTP_OK,
+            );
+
+        } catch (QueryException $e) {
+            return $this->databaseErrorResponse(
+                $e,
+                __FUNCTION__,
+                ['device_parameter_ids' => implode(',', $deviceParameterIds)],
+            );
+        }
+    }
+
+    /**
      * Fetch time-series data for a paramter in time buckets.
      * @see \App\Http\Controllers\Docs\DeviceDataDocumentation::bucket() for API documentation
      */
-    public function bucket(Request $request, string $paramId)
+    public function bucket(Request $request, string $paramId): JsonResponse
     {
         if ($errors = $this->validateId($paramId)) {
             return $errors;
@@ -85,7 +125,7 @@ class DeviceDataController extends Controller
      * Store time-series data for a paramter.
      * @see \App\Http\Controllers\Docs\DeviceDataDocumentation::store() for API documentation
      */
-    public function store(Request $request, string $paramId)
+    public function store(Request $request, string $paramId): JsonResponse
     {
         if ($errors = $this->validateId($paramId)) {
             return $errors;
