@@ -25,7 +25,7 @@ class DeviceDataController extends Controller
     ) {}
 
     /**
-     * Fetch the latest reading and alarm state for an array of DeviceParameters.
+     * Fetch the latest reading and alarm state for a set of device parameters.
      * @see \App\Http\Controllers\Docs\DeviceDataDocumentation::heartbeat() for API documentation
      */
     public function heartbeat(Request $request): JsonResponse

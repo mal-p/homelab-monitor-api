@@ -3,9 +3,134 @@
     "info": {
         "title": "Home-monitor API",
         "description": "A small home monitoring API for logging electricity usage, temperature etc.",
-        "version": "1.1.1"
+        "version": "1.2.0"
     },
     "paths": {
+        "/api/device-parameters/heartbeat": {
+            "post": {
+                "tags": [
+                    "parameter-data"
+                ],
+                "summary": "Fetch the latest reading and alarm state for a set of device parameters.",
+                "operationId": "deviceParameterHeartbeat",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "device_parameter_ids"
+                                ],
+                                "properties": {
+                                    "device_parameter_ids": {
+                                        "description": "Device parameter IDs to fetch latest reading + alarm state for",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "minimum": 1
+                                        },
+                                        "maxItems": 100,
+                                        "minItems": 1,
+                                        "uniqueItems": true,
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "heartbeat"
+                                    ],
+                                    "properties": {
+                                        "heartbeat": {
+                                            "type": "array",
+                                            "items": {
+                                                "required": [
+                                                    "device_parameter_id",
+                                                    "name",
+                                                    "unit",
+                                                    "alarm_type",
+                                                    "alarm_active",
+                                                    "latest_time",
+                                                    "latest_value"
+                                                ],
+                                                "properties": {
+                                                    "device_parameter_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Humidity"
+                                                    },
+                                                    "unit": {
+                                                        "type": "string",
+                                                        "example": "%"
+                                                    },
+                                                    "alarm_type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "none",
+                                                            "low",
+                                                            "high"
+                                                        ],
+                                                        "example": "none"
+                                                    },
+                                                    "alarm_active": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "latest_time": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "example": "2023-01-30T13:00:00Z",
+                                                        "nullable": true
+                                                    },
+                                                    "latest_value": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 20.5,
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Authentication exception"
+                    },
+                    "422": {
+                        "description": "Validation exception"
+                    },
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
         "/api/device-parameters/{device_parameter_id}/data": {
             "get": {
                 "tags": [
@@ -39,11 +164,12 @@
                     {
                         "name": "end",
                         "in": "query",
-                        "description": "Time interval end",
-                        "required": true,
+                        "description": "Time interval end (defaults to now when omitted)",
+                        "required": false,
                         "schema": {
                             "type": "string",
-                            "format": "date-time"
+                            "format": "date-time",
+                            "nullable": true
                         },
                         "example": "2023-01-30T17:00:00Z"
                     },
@@ -1947,13 +2073,14 @@
                 "security": []
             }
         },
-        "/api/users/logout": {
-            "get": {
+        "/api/users/me/logout": {
+            "post": {
                 "tags": [
                     "users"
                 ],
                 "summary": "Logout the current user.",
-                "operationId": "userLogout",
+                "description": "Revoke the current API token for the authenticated user.",
+                "operationId": "userMeLogout",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1974,8 +2101,49 @@
                             }
                         }
                     },
-                    "422": {
-                        "description": "Validation exception"
+                    "500": {
+                        "description": "Database exception"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/api/users/me/logout-other-tokens": {
+            "post": {
+                "tags": [
+                    "users"
+                ],
+                "summary": "Logout all other tokens for the current user.",
+                "description": "Revoke all other API tokens for the currently authenticated user, keeping the current token active.",
+                "operationId": "userMeLogoutOtherTokens",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "required": [
+                                        "message",
+                                        "revoked_count"
+                                    ],
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Other tokens logged out successfully"
+                                        },
+                                        "revoked_count": {
+                                            "type": "integer",
+                                            "example": 3
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "500": {
                         "description": "Database exception"
@@ -1988,13 +2156,13 @@
                 ]
             }
         },
-        "/api/users": {
+        "/api/users/me": {
             "get": {
                 "tags": [
                     "users"
                 ],
                 "summary": "Get details for the currently logged-in user.",
-                "operationId": "userGet",
+                "operationId": "userMeShow",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2020,21 +2188,6 @@
                                                     "type": "string",
                                                     "format": "email",
                                                     "example": "jane.doe@example.com"
-                                                },
-                                                "email_verified_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-01-30T13:00:00Z"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-01-30T13:00:00Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-01-30T13:00:00Z"
                                                 }
                                             },
                                             "type": "object"
@@ -2044,9 +2197,6 @@
                                 }
                             }
                         }
-                    },
-                    "422": {
-                        "description": "Validation exception"
                     }
                 },
                 "security": [

@@ -9,7 +9,7 @@ use OpenApi\Attributes as OA;
 class DeviceDataDocumentation
 {
     /**
-     * Fetch the latest reading and alarm state for an array of DeviceParameters.
+     * Fetch the latest reading and alarm state for a set of device parameters.
      */
     #[OA\Post(
         path: '/api/device-parameters/heartbeat',
