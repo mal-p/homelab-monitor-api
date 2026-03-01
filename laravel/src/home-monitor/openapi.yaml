@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: 'Home-monitor API'
   description: 'A small home monitoring API for logging electricity usage, temperature etc.'
-  version: 1.2.0
+  version: 1.2.1
 paths:
   /api/device-parameters/heartbeat:
     post:
@@ -242,10 +242,9 @@ paths:
                   maxLength: 100
                   example: ''
                   nullable: true
-                location:
-                  type: string
-                  maxLength: 255
-                  example: Bedroom
+                location_id:
+                  type: integer
+                  example: 7
                   nullable: true
                 description:
                   type: string
@@ -265,7 +264,7 @@ paths:
                 required:
                   - device
                 properties:
-                  device: { required: [id, name, is_active, type], properties: { id: { type: integer, example: 1 }, name: { type: string, example: 'Govee BT Bedroom' }, serial_number: { type: string, example: 56-79-A5-19-08-B7 }, mpan: { type: string, example: '' }, location: { type: string, example: Bedroom }, description: { type: string, example: '' }, is_active: { type: boolean, example: true }, type: { type: string, example: 'Bluetooth device' }, parameters: { type: array, items: { required: [id, device_id, name, unit, alarm_type, alarm_trigger, alarm_hysteresis, alarm_active, alarm_updated_at], properties: { id: { type: integer, example: 3 }, device_id: { type: integer, example: 1 }, name: { type: string, example: Temperature }, unit: { type: string, example: °C }, alarm_type: { type: string, example: low }, alarm_trigger: { type: number, format: float, example: 30 }, alarm_hysteresis: { type: number, format: float, example: 0 }, alarm_active: { type: boolean, example: false }, alarm_updated_at: { type: string, format: date-time, example: '2023-01-30T13:00:00Z' } }, type: object } } }, type: object }
+                  device: { required: [id, name, is_active, type], properties: { id: { type: integer, example: 1 }, name: { type: string, example: 'Govee BT Bedroom' }, serial_number: { type: string, example: 56-79-A5-19-08-B7 }, mpan: { type: string, example: '' }, location: { required: [id, name, description], properties: { id: { type: integer, example: 7 }, name: { type: string, example: Bedroom }, description: { type: string, example: 'Upstairs front bedroom' } }, type: object, nullable: true }, description: { type: string, example: '' }, is_active: { type: boolean, example: true }, type: { type: string, example: 'Bluetooth device' }, parameters: { type: array, items: { required: [id, device_id, name, unit, alarm_type, alarm_trigger, alarm_hysteresis, alarm_active, alarm_updated_at], properties: { id: { type: integer, example: 3 }, device_id: { type: integer, example: 1 }, name: { type: string, example: Temperature }, unit: { type: string, example: °C }, alarm_type: { type: string, example: low }, alarm_trigger: { type: number, format: float, example: 30 }, alarm_hysteresis: { type: number, format: float, example: 0 }, alarm_active: { type: boolean, example: false }, alarm_updated_at: { type: string, format: date-time, example: '2023-01-30T13:00:00Z' } }, type: object } } }, type: object }
                 type: object
         '401':
           description: 'Authentication exception'
@@ -301,7 +300,7 @@ paths:
                 required:
                   - device
                 properties:
-                  device: { required: [id, name, is_active, type], properties: { id: { type: integer, example: 1 }, name: { type: string, example: 'Govee BT Bedroom' }, serial_number: { type: string, example: 56-79-A5-19-08-B7 }, mpan: { type: string, example: '' }, location: { type: string, example: Bedroom }, description: { type: string, example: '' }, is_active: { type: boolean, example: true }, type: { type: string, example: 'Bluetooth device' }, parameters: { type: array, items: { required: [id, device_id, name, unit, alarm_type, alarm_trigger, alarm_hysteresis, alarm_active, alarm_updated_at], properties: { id: { type: integer, example: 3 }, device_id: { type: integer, example: 1 }, name: { type: string, example: Temperature }, unit: { type: string, example: °C }, alarm_type: { type: string, example: low }, alarm_trigger: { type: number, format: float, example: 30 }, alarm_hysteresis: { type: number, format: float, example: 0 }, alarm_active: { type: boolean, example: false }, alarm_updated_at: { type: string, format: date-time, example: '2023-01-30T13:00:00Z' } }, type: object } } }, type: object }
+                  device: { required: [id, name, is_active, type], properties: { id: { type: integer, example: 1 }, name: { type: string, example: 'Govee BT Bedroom' }, serial_number: { type: string, example: 56-79-A5-19-08-B7 }, mpan: { type: string, example: '' }, location: { required: [id, name, description], properties: { id: { type: integer, example: 7 }, name: { type: string, example: Bedroom }, description: { type: string, example: 'Upstairs front bedroom' } }, type: object, nullable: true }, description: { type: string, example: '' }, is_active: { type: boolean, example: true }, type: { type: string, example: 'Bluetooth device' }, parameters: { type: array, items: { required: [id, device_id, name, unit, alarm_type, alarm_trigger, alarm_hysteresis, alarm_active, alarm_updated_at], properties: { id: { type: integer, example: 3 }, device_id: { type: integer, example: 1 }, name: { type: string, example: Temperature }, unit: { type: string, example: °C }, alarm_type: { type: string, example: low }, alarm_trigger: { type: number, format: float, example: 30 }, alarm_hysteresis: { type: number, format: float, example: 0 }, alarm_active: { type: boolean, example: false }, alarm_updated_at: { type: string, format: date-time, example: '2023-01-30T13:00:00Z' } }, type: object } } }, type: object }
                 type: object
         '401':
           description: 'Authentication exception'
@@ -358,10 +357,9 @@ paths:
                   maxLength: 100
                   example: ''
                   nullable: true
-                location:
-                  type: string
-                  maxLength: 255
-                  example: Bedroom
+                location_id:
+                  type: integer
+                  example: 7
                   nullable: true
                 description:
                   type: string
@@ -851,6 +849,205 @@ paths:
       security:
         -
           api_key: []
+  /api/locations:
+    get:
+      tags:
+        - locations
+      summary: 'List locations.'
+      operationId: locationIndex
+      parameters:
+        -
+          name: page
+          in: query
+          description: 'Optional pagination index'
+          required: false
+          schema:
+            type: integer
+            maximum: 1000
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: 'Returns all locations if no page parameter is provided, or a paginated subset if page is specified'
+                required:
+                  - locations
+                  - links
+                properties:
+                  locations: { type: array, items: { required: [id, name, description], properties: { id: { type: integer, example: 1 }, name: { type: string, example: Bedroom }, description: { type: string, example: 'Upstairs bedroom', nullable: true } }, type: object } }
+                  links: { description: 'Pagination links for navigating between pages', type: array, items: { required: [href, rel, method], properties: { href: { type: string, example: 'http://localhost/api/locations?page=2' }, rel: { type: string, enum: [next, prev], example: next }, method: { type: string, example: GET } }, type: object } }
+                type: object
+        '401':
+          description: 'Authentication exception'
+        '422':
+          description: 'Validation exception'
+        '500':
+          description: 'Database exception'
+      security:
+        -
+          api_key: []
+    post:
+      tags:
+        - locations
+      summary: 'Store a newly created location.'
+      operationId: locationStore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  maxLength: 255
+                  minLength: 3
+                  example: Bedroom
+                description:
+                  type: string
+                  maxLength: 2000
+                  example: 'Upstairs bedroom'
+                  nullable: true
+              type: object
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                required:
+                  - location
+                properties:
+                  location: { required: [id, name, description], properties: { id: { type: integer, example: 1 }, name: { type: string, example: Bedroom }, description: { type: string, example: 'Upstairs bedroom', nullable: true } }, type: object }
+                type: object
+        '401':
+          description: 'Authentication exception'
+        '422':
+          description: 'Validation exception'
+        '500':
+          description: 'Database exception'
+      security:
+        -
+          api_key: []
+  '/api/locations/{location_id}':
+    get:
+      tags:
+        - locations
+      summary: 'Show details for the specified location, including its devices.'
+      operationId: locationShow
+      parameters:
+        -
+          name: location_id
+          in: path
+          description: 'The location ID'
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                required:
+                  - location
+                properties:
+                  location: { required: [id, name, description, devices], properties: { id: { type: integer, example: 1 }, name: { type: string, example: Bedroom }, description: { type: string, example: 'Upstairs bedroom', nullable: true }, devices: { type: array, items: { required: [id, name, is_active], properties: { id: { type: integer, example: 12 }, name: { type: string, example: 'Govee BT Bedroom' }, is_active: { type: boolean, example: true } }, type: object } } }, type: object }
+                type: object
+        '401':
+          description: 'Authentication exception'
+        '404':
+          description: 'Missing location'
+        '422':
+          description: 'Validation exception'
+        '500':
+          description: 'Database exception'
+      security:
+        -
+          api_key: []
+    put:
+      tags:
+        - locations
+      summary: 'Update the specified location.'
+      operationId: locationUpdate
+      parameters:
+        -
+          name: location_id
+          in: path
+          description: 'The location ID'
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  maxLength: 255
+                  minLength: 3
+                  example: Bedroom
+                description:
+                  type: string
+                  maxLength: 2000
+                  example: 'Upstairs bedroom'
+                  nullable: true
+              type: object
+      responses:
+        '204':
+          description: 'No Content'
+        '401':
+          description: 'Authentication exception'
+        '404':
+          description: 'Missing location'
+        '422':
+          description: 'Validation exception'
+        '500':
+          description: 'Database exception'
+      security:
+        -
+          api_key: []
+    delete:
+      tags:
+        - locations
+      summary: 'Remove the specified location from storage.'
+      operationId: locationDestroy
+      parameters:
+        -
+          name: location_id
+          in: path
+          description: 'The location ID'
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '204':
+          description: 'No Content'
+        '401':
+          description: 'Authentication exception'
+        '404':
+          description: 'Missing location'
+        '422':
+          description: 'Validation exception'
+        '500':
+          description: 'Database exception'
+      security:
+        -
+          api_key: []
   /api/users/register:
     post:
       tags:
@@ -1047,6 +1244,9 @@ tags:
   -
     name: device-types
     description: device-types
+  -
+    name: locations
+    description: locations
   -
     name: users
     description: users

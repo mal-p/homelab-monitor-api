@@ -1,12 +1,6 @@
 -- Database Initialization Script for Home Monitoring
 -- This script creates the database, role, tables, and TimescaleDB hypertable
 
--- Create the database
-CREATE DATABASE homelab;
-
--- Connect to the homelab database
-\c homelab
-
 -- TimescaleDB extension should already be present in Docker image.
 CREATE EXTENSION IF NOT EXISTS timescaledb;
 
@@ -20,6 +14,12 @@ CREATE ROLE "homelab-role" WITH
     NOCREATEROLE
     NOREPLICATION;
 
+-- Create the database
+CREATE DATABASE homelab OWNER "homelab-role";
+
+-- Connect to the homelab database
+\c homelab
+
 -- Grant privileges on the database
 GRANT CONNECT ON DATABASE homelab TO "homelab-role";
 GRANT USAGE ON SCHEMA public TO "homelab-role";
@@ -31,6 +31,8 @@ CREATE TABLE device_types (
     name          VARCHAR(255)              UNIQUE NOT NULL,
     description   TEXT
 );
+ALTER TABLE public.device_types OWNER TO "homelab-role";
+ALTER SEQUENCE public.device_types_id_seq OWNER TO "homelab-role";
 
 CREATE TABLE devices (
     id            SERIAL                    PRIMARY KEY,
@@ -46,6 +48,8 @@ CREATE TABLE devices (
 
     CONSTRAINT fk_devices_type FOREIGN KEY (type_id) REFERENCES device_types(id) ON DELETE CASCADE
 );
+ALTER TABLE public.devices OWNER TO "homelab-role";
+ALTER SEQUENCE public.devices_id_seq OWNER TO "homelab-role";
 
 COMMENT ON COLUMN devices.serial_number IS 'Device ID 1. Octopus serial or Govee H5075 MAC address';
 COMMENT ON COLUMN devices.mpan          IS 'Device ID 2. Octopus MPAN';
@@ -65,6 +69,8 @@ CREATE TABLE device_parameters (
 
     CONSTRAINT fk_parameters_device FOREIGN KEY (device_id) REFERENCES devices(id) ON DELETE CASCADE
 );
+ALTER TABLE public.device_parameters OWNER TO "homelab-role";
+ALTER SEQUENCE public.device_parameters_id_seq OWNER TO "homelab-role";
 
 -- Create hypertable for time-series data
 CREATE TABLE device_data (

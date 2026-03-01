@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Run application seeders
+        $this->call(LocationSeeder::class);
         $this->call(DeviceTypeSeeder::class);
         $this->call(DeviceSeeder::class);
         $this->call(DeviceParameterSeeder::class);

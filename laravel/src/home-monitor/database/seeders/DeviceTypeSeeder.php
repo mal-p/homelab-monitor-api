@@ -18,7 +18,7 @@ class DeviceTypeSeeder extends Seeder
             'Bluetooth device' => 'Govee H5075 Bluetooth temperature/humidity',
         ];
 
-        foreach($deviceTypes as $typeName => $typeDesc) {
+        foreach ($deviceTypes as $typeName => $typeDesc) {
             DeviceType::firstOrCreate(
                 ['name' => $typeName],
                 ['description' => $typeDesc],

@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{DeviceController, DeviceDataController, DeviceParameterController, DeviceTypeController};
+use App\Http\Controllers\{DeviceController, DeviceDataController, DeviceParameterController, DeviceTypeController, LocationController};
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RedirectController;
 use Illuminate\Support\Facades\Route;
@@ -53,6 +53,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [DeviceController::class, 'show'])->name('show');
         Route::put('/{id}', [DeviceController::class, 'update'])->name('update');
         Route::delete('/{id}', [DeviceController::class, 'destroy'])->name('destroy');
+    });
+
+    // Location routes
+    Route::name('locations.')->prefix('locations')->group(function () {
+        Route::get('/', [LocationController::class, 'index'])->name('index');
+        Route::post('/', [LocationController::class, 'store'])->name('store');
+        Route::get('/{id}', [LocationController::class, 'show'])->name('show');
+        Route::put('/{id}', [LocationController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LocationController::class, 'destroy'])->name('destroy');
     });
 
     Route::fallback([RedirectController::class, 'unknownApiRoute']);

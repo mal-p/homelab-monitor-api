@@ -73,7 +73,7 @@ class DeviceController extends Controller
                     'name' => $device->name,
                     'serial_number' => $device->serial_number,
                     'mpan' => $device->mpan,
-                    'location' => $device->location ?? '',
+                    'location' => $device->location ?? null,
                     'description' => $device->description ?? '',
                     'is_active' => $device->is_active,
                     'type' => $device->deviceType->name, // Device Model always eager loads deviceType
@@ -106,7 +106,7 @@ class DeviceController extends Controller
                     'name' => $device->name,
                     'serial_number' => $device->serial_number,
                     'mpan' => $device->mpan,
-                    'location' => $device->location ?? '',
+                    'location' => $device->location ?? null,
                     'description' => $device->description ?? '',
                     'is_active' => $device->is_active,
                     'type' => $device->deviceType->name, // Device Model always eager loads deviceType

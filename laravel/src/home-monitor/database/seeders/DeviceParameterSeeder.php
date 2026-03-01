@@ -23,7 +23,7 @@ class DeviceParameterSeeder extends Seeder
             'unit' => 'kWh',
         ]);
 
-        foreach([$btDevice01, $btDevice02] as $btDev) {
+        foreach ([$btDevice01, $btDevice02] as $btDev) {
             DeviceParameter::firstOrCreate([
                 'device_id' => $btDev->id,
                 'name' => 'Temperature',

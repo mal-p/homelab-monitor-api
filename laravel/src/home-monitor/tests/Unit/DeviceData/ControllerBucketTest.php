@@ -57,14 +57,6 @@ describe('validation', function () {
             ->and($response->getData(true))->toHaveKey('errors.start');
     });
 
-    it('returns error when end date is missing', function () {
-        $request = request()->merge(['start' => $this->validStart]);
-        $response = $this->controller->bucket($request, $this->paramId);
-
-        expect($response->getStatusCode())->toBe(Response::HTTP_UNPROCESSABLE_ENTITY)
-            ->and($response->getData(true))->toHaveKey('errors.end');
-    });
-
     it('returns error when start date has invalid format', function () {
         $request = request()->merge([
             'start' => '2023/01/01 00:00:00',
@@ -136,6 +128,39 @@ describe('successful responses', function () {
         $request = request()->merge([
             'start' => $this->validStart,
             'end' => $this->validEnd,
+            // default bucket size
+        ]);
+
+        $response = $this->controller->bucket($request, $this->paramId);
+
+        expect($response->getStatusCode())->toBe(Response::HTTP_OK)
+            ->and($response->getData(true))->toHaveKey('data')
+            ->and($response->getData(true)['data'])->toBe($bucketData);
+    });
+
+    it('returns bucketed data successfully with default end parameter', function () {
+        $bucketData = [[
+            'bucket_start' => "2023-01-01 12:00:00+00",
+            'count' => 2,
+            'min_value' => 0.19,
+            'max_value' => 0.21,
+            'avg_value' => 0.20,
+        ]];
+
+        $deviceParameterInstance = Mockery::mock();
+        $deviceParameterInstance->shouldReceive('bucketData')
+            ->once()
+            ->with(60, Mockery::type(\DateTime::class), Mockery::type(\DateTime::class))
+            ->andReturn($bucketData);
+
+        $this->deviceParameterAlias->shouldReceive('findOrFail')
+            ->once()
+            ->with($this->paramId)
+            ->andReturn($deviceParameterInstance);
+
+        $request = request()->merge([
+            'start' => $this->validStart,
+            // default end time
             // default bucket size
         ]);
 

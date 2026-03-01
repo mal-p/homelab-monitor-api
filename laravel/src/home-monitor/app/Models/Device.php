@@ -24,7 +24,7 @@ class Device extends Model
         'name',
         'serial_number',
         'mpan',
-        'location',
+        'location_id',
         'description',
         'is_active',
     ];
@@ -54,6 +54,14 @@ class Device extends Model
     public function deviceParameters(): HasMany
     {
         return $this->hasMany(DeviceParameter::class, 'device_id', 'id');
+    }
+
+    /**
+     * Fetch the location for this device.
+     */
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class, 'location_id', 'id');
     }
 
     /*

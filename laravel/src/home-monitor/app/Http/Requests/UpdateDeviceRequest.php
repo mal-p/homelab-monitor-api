@@ -31,7 +31,7 @@ class UpdateDeviceRequest extends FormRequest
             'name' => ['required', 'string', 'min:3', 'max:255'],
             'serial_number' => ['required', 'string', 'min:1', 'max:100', "unique:devices,serial_number,{$id}"],
             'mpan' => ['nullable', 'string', 'max:100', "unique:devices,mpan,{$id}"],
-            'location' => ['nullable', 'string', 'max:255'],
+            'location_id' => ['nullable', 'integer', 'exists:pgsql.locations,id'],
             'description' => ['nullable', 'string', 'max:2000'],
             'is_active' => ['required', 'boolean'],
         ];

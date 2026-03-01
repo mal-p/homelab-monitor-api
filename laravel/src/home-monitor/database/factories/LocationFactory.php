@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\DeviceType>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Location>
  */
-class DeviceTypeFactory extends Factory
+class LocationFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,8 +17,8 @@ class DeviceTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->word() . ' sensor',
-            'description' => fake()->sentence(),
+            'name' => fake()->unique()->words(2, true),
+            'description' => fake()->optional(0.6)->sentence(),
         ];
     }
 }

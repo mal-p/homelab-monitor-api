@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\{Device, DeviceType, DeviceParameter};
+use App\Models\{Device, DeviceType, DeviceParameter, Location};
 use Illuminate\Database\Eloquent\Relations\{BelongsTo, HasMany};
 
 beforeEach(function () {
@@ -30,7 +30,7 @@ describe('Model Configuration', function () {
             'name',
             'serial_number',
             'mpan',
-            'location',
+            'location_id',
             'description',
             'is_active',
         ];
@@ -79,6 +79,18 @@ describe('Relationships', function () {
         expect($this->device->deviceParameters)->toHaveCount(3)
             ->and($this->device->deviceParameters->first())->toBeInstanceOf(DeviceParameter::class);
     });
+
+    it('has location relationship', function () {
+        expect($this->device->location())->toBeInstanceOf(BelongsTo::class);
+    });
+
+    it('belongs to a location', function () {
+        $location = Location::factory()->create();
+        $device = Device::factory()->create(['location_id' => $location->id]);
+
+        expect($device->location)->toBeInstanceOf(Location::class)
+            ->and($device->location->id)->toBe($location->id);
+    });
 });
 
 describe('Local Scopes', function () {
@@ -114,13 +126,14 @@ describe('Local Scopes', function () {
 describe('Model Persistence', function () {
     it('can create device with all fillable attributes', function () {
         $deviceType = DeviceType::factory()->create();
+        $location = Location::factory()->create();
 
         $device = Device::create([
             'type_id' => $deviceType->id,
             'name' => 'New Device',
             'serial_number' => 'SN12345',
             'mpan' => 'MPAN123',
-            'location' => 'Test location',
+            'location_id' => $location->id,
             'description' => 'Test description',
             'is_active' => true,
         ]);
@@ -129,7 +142,6 @@ describe('Model Persistence', function () {
             ->and($device->name)->toBe('New Device')
             ->and($device->serial_number)->toBe('SN12345')
             ->and($device->mpan)->toBe('MPAN123')
-            ->and($device->location)->toBe('Test location')
             ->and($device->description)->toBe('Test description')
             ->and($device->is_active)->toBeTrue();
     });
